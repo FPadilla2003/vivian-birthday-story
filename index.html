@@ -45,12 +45,11 @@
             flex-direction: column;
             justify-content: space-between;
         }
-        /* New wrapper to handle text centering and scrolling */
         #dialogue-wrapper {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* This centers the text vertically */
+            justify-content: center;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #4E342E #5D4037;
@@ -58,8 +57,7 @@
         #dialogue-text {
             color: #FFFDE7;
             line-height: 1.4;
-            /* The font-size is now controlled by JavaScript */
-            transition: font-size 0.2s ease-out; /* Adds a smooth transition */
+            transition: font-size 0.2s ease-out;
         }
         #choices-container {
             display: flex;
@@ -90,7 +88,6 @@
             transform: translateY(1px);
             border-bottom-width: 3px;
         }
-        
         .sprite {
             position: absolute;
             transition: all 1s ease-in-out;
@@ -110,11 +107,12 @@
 <body>
 
     <div id="game-wrapper">
-        <div id="scene-container" style="background-image: url('vivian\'s mushroom grove bg.png');">
+        <div id="scene-container" style="background-image: url('/images/vivian\'s mushroom grove bg.png');">
             <img id="vivian-sprite" class="sprite" />
             <img id="frog-sprite" class="sprite hidden" />
             <img id="firefly-sprite" class="sprite hidden" />
-            <img id="giggleweed-sprite" class="sprite hidden" /> </div>
+            <img id="giggleweed-sprite" class="sprite hidden" />
+        </div>
         <div id="ui-container">
             <div id="dialogue-wrapper">
                 <p id="dialogue-text">Loading...</p>
@@ -130,7 +128,7 @@
         VIVIAN: '/images/vivian mushroom sprite.png',
         FROG: '/images/frog.png',
         FIREFLY: '/images/firefly.png',
-        FUCKYWUPYWEED: 'images/giggleweed roll.png', // Renamed!
+        FUCKYWUPYWEED: '/images/giggleweed roll.png',
         
         // Backgrounds
         MUSHROOM_GROVE: "/images/vivian mushroom grove bg.png",
@@ -149,7 +147,7 @@
     const vivianSprite = document.getElementById('vivian-sprite');
     const frogSprite = document.getElementById('frog-sprite');
     const fireflySprite = document.getElementById('firefly-sprite');
-    const giggleweedSprite = document.getElementById('giggleweed-sprite'); // This still refers to the DOM element for the weed.
+    const giggleweedSprite = document.getElementById('giggleweed-sprite');
 
     // --- Story Data ---
     const story = {
@@ -161,7 +159,7 @@
                 hideSprite(fireflySprite);
                 hideSprite(giggleweedSprite);
             },
-            dialogue: "It's Vivian's birthday! The forest air is buzzing with excitement, but she wants this birthday to be truly special. She remembers whispers of a legendary treasure: the Fuckywupyweed Roll-up.", // Updated dialogue
+            dialogue: "It's Vivian's birthday! The forest air is buzzing with excitement, but she wants this birthday to be truly special. She remembers whispers of a legendary treasure: the Fuckywupyweed Roll-up.",
             choices: [
                 { text: "This sounds like a quest!", next: "act1_start" },
                 { text: "Maybe just have a normal party.", next: "boring_ending" }
@@ -174,7 +172,6 @@
                 { text: "The End. (Play Again?)", next: "start" }
             ]
         },
-        // --- ACT 1 ---
         act1_start: {
             bg: ASSETS.FOREST_PATH,
             setup: () => {
@@ -185,7 +182,6 @@
                 { text: "Head towards the stream.", next: "act2_stream_intro" }
             ]
         },
-        // --- ACT 2 ---
         act2_stream_intro: {
             bg: ASSETS.STREAM_BANK,
             setup: () => {
@@ -194,13 +190,13 @@
             },
             dialogue: "At the stream sits a very wise, very sleepy-looking frog. He seems to be meditating. He opens one eye as Vivian approaches.",
             choices: [
-                { text: "Ask about the Fuckywupyweed.", next: "act2_ask_frog" }, // Updated dialogue
+                { text: "Ask about the Fuckywupyweed.", next: "act2_ask_frog" },
                 { text: "Try to sneak past him.", next: "act2_sneak_fail" }
             ]
         },
         act2_ask_frog: {
             bg: ASSETS.STREAM_BANK,
-            dialogue: "'Hmph. Fuckywupyweed...' the frog croaks slowly. 'A powerful herb. Not for the impatient. To prove your worth, answer my riddle: I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?'", // Updated dialogue
+            dialogue: "'Hmph. Fuckywupyweed...' the frog croaks slowly. 'A powerful herb. Not for the impatient. To prove your worth, answer my riddle: I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?'",
             choices: [
                 { text: "A map.", next: "act2_riddle_correct" },
                 { text: "A dream.", next: "act2_riddle_wrong" },
@@ -223,7 +219,7 @@
         },
         act2_riddle_correct: {
             bg: ASSETS.STREAM_BANK,
-            dialogue: "'Hah! Correct!' The frog chuckles. 'A map it is. You have a good head on your... cap. To find the Fuckywupyweed, you must venture into the Gloomy Thicket. But you will need a guide. Seek the light in the darkness.'", // Updated dialogue
+            dialogue: "'Hah! Correct!' The frog chuckles. 'A map it is. You have a good head on your... cap. To find the Fuckywupyweed, you must venture into the Gloomy Thicket. But you will need a guide. Seek the light in the darkness.'",
             choices: [
                 { text: "Thank him and enter the thicket.", next: "act2_thicket_entrance" }
             ]
@@ -239,7 +235,6 @@
                 { text: "Venture into the dark.", next: "act3_thicket_inside" }
             ]
         },
-        // --- ACT 3 ---
         act3_thicket_inside: {
             bg: ASSETS.INSIDE_THICKET,
             setup: () => {
@@ -269,20 +264,19 @@
                 showSprite(fireflySprite, {bottom: '60%', left: '25%', width: '100px'});
                 showSprite(giggleweedSprite, {bottom: '35%', left: '52%', width: '200px', transform: 'translateX(-50%) rotate(-15deg)'});
             },
-            dialogue: "Vivian follows the little firefly through winding, dark paths. Suddenly, the trees open up into a breathtaking grotto! A waterfall cascades behind a stone altar, and upon it... the Fuckywupyweed Roll-up!", // Updated dialogue
+            dialogue: "Vivian follows the little firefly through winding, dark paths. Suddenly, the trees open up into a breathtaking grotto! A waterfall cascades behind a stone altar, and upon it... the Fuckywupyweed Roll-up!",
             choices: [
                 { text: "Claim the birthday prize!", next: "win_ending" }
             ]
         },
         win_ending: {
-            bg: ASSETS.MUSHROOM_GROVE,
+            bg: ASSETS.MUSHROOM_GROTTO,
             setup: () => {
                  showSprite(vivianSprite, {bottom: '5%', left: '50%', width: '180px', transform: 'translateX(-50%)'});
-                 // Show Fuckywupyweed next to Vivian!
                  showSprite(giggleweedSprite, {bottom: '5%', left: '30%', width: '100px', transform: 'translateX(-50%)'}); 
                  hideSprite(fireflySprite);
             },
-            dialogue: "Vivian returns home a hero, the Fuckywupyweed Roll-up in hand. Her birthday party was legendary. The forest echoed with laughter and good vibes for weeks. It was the best birthday ever.", // Updated dialogue
+            dialogue: "Vivian returns home a hero, the Fuckywupyweed Roll-up in hand. Her birthday party was legendary. The forest echoed with laughter and good vibes for weeks. It was the best birthday ever.",
             choices: [
                 { text: "Truly Victorious! (Play Again?)", next: "start" }
             ]
@@ -303,20 +297,13 @@
         element.classList.add('hidden');
     }
 
-    // This function adjusts the font size of the dialogue text to fit its container.
     function adjustFontSize() {
         const dialogueWrapper = document.getElementById('dialogue-wrapper');
         const dialogueText = document.getElementById('dialogue-text');
-
-        // Set a maximum and minimum font size in pixels.
         const maxFontSize = 28;
         const minFontSize = 18;
-
-        // Reset font size to the max value to start the calculation.
         let currentSize = maxFontSize;
         dialogueText.style.fontSize = currentSize + 'px';
-
-        // Shrink the font size until the text's scroll height fits within the wrapper's client height.
         while (dialogueText.scrollHeight > dialogueWrapper.clientHeight && currentSize > minFontSize) {
             currentSize--;
             dialogueText.style.fontSize = currentSize + 'px';
@@ -332,19 +319,14 @@
         
         currentNodeKey = nodeKey;
         
-        // Set background
         sceneContainer.style.backgroundImage = `url('${node.bg}')`;
         
-        // Run setup for sprite positions
         node.setup?.();
 
-        // Set dialogue
         dialogueText.textContent = node.dialogue;
 
-        // Adjust font size to fit the new text perfectly.
         adjustFontSize();
         
-        // Create choices
         choicesContainer.innerHTML = '';
         node.choices.forEach(choice => {
             const button = document.createElement('button');
@@ -355,21 +337,19 @@
         });
     }
 
-    // --- Preload images and start game ---
     window.onload = () => {
-        // Set initial sprite sources
         vivianSprite.src = ASSETS.VIVIAN;
         frogSprite.src = ASSETS.FROG;
         fireflySprite.src = ASSETS.FIREFLY;
-        giggleweedSprite.src = ASSETS.FUCKYWUPYWEED; // Pointing to the new asset name
+        giggleweedSprite.src = ASSETS.FUCKYWUPYWEED;
         
-        // Preload all other images for smoother transitions later
         Object.values(ASSETS).forEach(url => {
              const img = new Image();
              img.src = url;
         });
         
-        // Start the game by running the setup for the first node.
         showNode('start');
     };
     </script>
+</body>
+</html>
