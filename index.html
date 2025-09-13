@@ -7,15 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Base Styles for all screen sizes */
         body {
             font-family: 'Gaegu', cursive;
             overflow: hidden;
-            background-color: #1a1a1a;
+            background-color: #000; /* Black bars for aspect ratio differences */
         }
         #game-wrapper {
             max-width: 900px;
             width: 100%;
-            height: 100vh;
+            height: 100vh; /* Full viewport height */
             max-height: 100vh;
             margin: auto;
             display: flex;
@@ -36,28 +37,27 @@
         #ui-container {
             flex-shrink: 0;
             height: 40%;
-            min-height: 240px;
-            max-height: 45vh;
+            max-height: 300px;
             background-color: #5D4037;
             border-top: 8px solid #4E342E;
             padding: 24px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: height 0.3s ease;
         }
         #dialogue-wrapper {
             flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            overflow-y: auto;
+            display: flex; /* Use flexbox to enable vertical centering */
+            overflow-y: auto; /* Allow scrolling if content overflows */
             scrollbar-width: thin;
             scrollbar-color: #4E342E #5D4037;
         }
         #dialogue-text {
             color: #FFFDE7;
             line-height: 1.4;
-            transition: font-size 0.2s ease-out;
+            font-size: clamp(1.2rem, 3vh, 1.7rem); /* Responsive font size */
+            margin: auto 0; /* The FIX: This vertically centers the text block but won't cut it off! */
         }
         #choices-container {
             display: flex;
@@ -70,13 +70,13 @@
             background-color: #8D6E63;
             color: #FFFFFF;
             font-weight: 700;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-bottom: 4px solid #5D4037;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: clamp(1rem, 2vh, 1.2rem);
+            font-size: clamp(0.9rem, 2.5vh, 1.1rem); /* Responsive font size */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .choice-btn:hover {
@@ -88,30 +88,63 @@
             transform: translateY(1px);
             border-bottom-width: 3px;
         }
+        
         .sprite {
             position: absolute;
+            height: auto;
             transition: all 1s ease-in-out;
             transform-origin: bottom center;
-            -webkit-filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.5));
-            filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.5));
+            -webkit-filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.3));
+            filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.3));
             -webkit-user-drag: none;
             user-select: none;
         }
+        /* Responsive Sprite Sizing using viewport width (vw) */
+        #vivian-sprite { width: 17vw; max-width: 160px; }
+        #frog-sprite { width: 28vw; max-width: 250px; }
+        #firefly-sprite { width: 14vw; max-width: 120px; }
+        #fuckywupyweed-sprite { width: 15vw; max-width: 140px; }
+
         .hidden {
             opacity: 0;
             transform: scale(0.8) translateY(20px);
             pointer-events: none;
         }
+        
+        /* --- Media Query for Mobile Devices --- */
+        @media (max-width: 768px) {
+            #game-wrapper {
+                border-left: none;
+                border-right: none;
+            }
+            #ui-container {
+                height: 35%;
+                max-height: 35vh;
+                padding: 16px;
+                min-height: 200px;
+            }
+            #dialogue-text {
+                 font-size: clamp(1rem, 3.5vw, 1.3rem);
+            }
+            .choice-btn {
+                padding: 12px 18px;
+            }
+            #vivian-sprite { width: 25vw; max-width: 150px; }
+            #frog-sprite { width: 40vw; max-width: 220px; }
+            #firefly-sprite { width: 20vw; max-width: 100px; }
+            #fuckywupyweed-sprite { width: 22vw; max-width: 130px; }
+        }
+
     </style>
 </head>
 <body>
 
     <div id="game-wrapper">
-        <div id="scene-container" style="background-image: url('/vivian mushroom grove bg.png');">
+        <div id="scene-container">
             <img id="vivian-sprite" class="sprite" />
             <img id="frog-sprite" class="sprite hidden" />
             <img id="firefly-sprite" class="sprite hidden" />
-            <img id="giggleweed-sprite" class="sprite hidden" />
+            <img id="fuckywupyweed-sprite" class="sprite hidden" />
         </div>
         <div id="ui-container">
             <div id="dialogue-wrapper">
@@ -122,15 +155,12 @@
     </div>
 
     <script>
-    // --- Asset URLs ---
+    // Asset URLs (using correct uploaded filenames)
     const ASSETS = {
-        // Sprites
         VIVIAN: '/vivian mushroom sprite.png',
         FROG: '/frog.png',
         FIREFLY: '/firefly.png',
         FUCKYWUPYWEED: '/giggleweed roll.png',
-        
-        // Backgrounds
         MUSHROOM_GROVE: "/vivian mushroom grove bg.png",
         FOREST_PATH: "/sun dappled forest path bg.png",
         STREAM_BANK: "/whispering stream bank bg.png",
@@ -139,194 +169,134 @@
         HIDDEN_GROTTO: "/hidden grotto bg.png"
     };
 
-    // --- DOM Elements ---
+    // DOM Elements
     const sceneContainer = document.getElementById('scene-container');
+    const dialogueWrapper = document.getElementById('dialogue-wrapper'); // Get the wrapper
     const dialogueText = document.getElementById('dialogue-text');
     const choicesContainer = document.getElementById('choices-container');
-    
-    const vivianSprite = document.getElementById('vivian-sprite');
-    const frogSprite = document.getElementById('frog-sprite');
-    const fireflySprite = document.getElementById('firefly-sprite');
-    const giggleweedSprite = document.getElementById('giggleweed-sprite');
+    const allSprites = {
+        vivian: document.getElementById('vivian-sprite'),
+        frog: document.getElementById('frog-sprite'),
+        firefly: document.getElementById('firefly-sprite'),
+        fuckywupyweed: document.getElementById('fuckywupyweed-sprite')
+    };
 
-    // --- Story Data ---
+    // Story Data (sizing is now handled by CSS, removed from here)
     const story = {
         start: {
             bg: ASSETS.MUSHROOM_GROVE,
-            setup: () => {
-                showSprite(vivianSprite, {bottom: '5%', left: '50%', width: '150px', transform: 'translateX(-50%)'});
-                hideSprite(frogSprite);
-                hideSprite(fireflySprite);
-                hideSprite(giggleweedSprite);
-            },
-            dialogue: "It's Vivian's birthday! The forest air is buzzing with excitement, but she wants this birthday to be truly special. She remembers whispers of a legendary treasure: the Fuckywupyweed Roll-up.",
-            choices: [
-                { text: "This sounds like a quest!", next: "act1_start" },
-                { text: "Maybe just have a normal party.", next: "boring_ending" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '50%', transform: 'translateX(-50%)' } }],
+            dialogue: "It's Vivian's birthday! The forest air is buzzing, but she wants this birthday to be special. She remembers whispers of a legendary treasure: the Fuckywupyweed Roll-up.",
+            choices: [{ text: "This sounds like a quest!", next: "act1_start" }, { text: "A normal party sounds fine.", next: "boring_ending" }]
         },
         boring_ending: {
             bg: ASSETS.MUSHROOM_GROVE,
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '50%', transform: 'translateX(-50%)' } }],
             dialogue: "Vivian decides against the quest. Her friends come over, they eat moss cake, and everyone has a perfectly pleasant, if forgettable, time. It was fine.",
-            choices: [
-                { text: "The End. (Play Again?)", next: "start" }
-            ]
+            choices: [{ text: "The End. (Play Again?)", next: "start" }]
         },
         act1_start: {
             bg: ASSETS.FOREST_PATH,
-            setup: () => {
-                showSprite(vivianSprite, {bottom: '5%', left: '15%', width: '150px'});
-            },
-            dialogue: "With a heart full of purpose, Vivian sets off. The first step is to find someone who knows the forest's secrets. An old map mentions a wise creature by the Whispering Stream.",
-            choices: [
-                { text: "Head towards the stream.", next: "act2_stream_intro" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '15%' } }],
+            dialogue: "With a heart full of purpose, Vivian sets off. An old map mentions a wise creature by the Whispering Stream who knows the forest's secrets.",
+            choices: [{ text: "Head towards the stream.", next: "act2_stream_intro" }]
         },
         act2_stream_intro: {
             bg: ASSETS.STREAM_BANK,
-            setup: () => {
-                 showSprite(vivianSprite, {bottom: '8%', left: '20%', width: '140px'});
-                 showSprite(frogSprite, {bottom: '10%', left: '65%', width: '250px'});
-            },
+            sprites: [{ id: 'vivian', pos: { bottom: '8%', left: '20%' } }, { id: 'frog', pos: { bottom: '10%', left: '60%' } }],
             dialogue: "At the stream sits a very wise, very sleepy-looking frog. He seems to be meditating. He opens one eye as Vivian approaches.",
-            choices: [
-                { text: "Ask about the Fuckywupyweed.", next: "act2_ask_frog" },
-                { text: "Try to sneak past him.", next: "act2_sneak_fail" }
-            ]
+            choices: [{ text: "Ask about the Fuckywupyweed.", next: "act2_ask_frog" }, { text: "Try to sneak past him.", next: "act2_sneak_fail" }]
         },
         act2_ask_frog: {
             bg: ASSETS.STREAM_BANK,
-            dialogue: "'Hmph. Fuckywupyweed...' the frog croaks slowly. 'A powerful herb. Not for the impatient. To prove your worth, answer my riddle: I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?'",
-            choices: [
-                { text: "A map.", next: "act2_riddle_correct" },
-                { text: "A dream.", next: "act2_riddle_wrong" },
-                { text: "A painting.", next: "act2_riddle_wrong" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '8%', left: '20%' } }, { id: 'frog', pos: { bottom: '10%', left: '60%' } }],
+            dialogue: "'Hmph. Fuckywupyweed...' the frog croaks. 'Not for the impatient. Answer my riddle: I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?'",
+            choices: [{ text: "A map.", next: "act2_riddle_correct" }, { text: "A dream.", next: "act2_riddle_wrong" }, { text: "A painting.", next: "act2_riddle_wrong" }]
         },
          act2_sneak_fail: {
             bg: ASSETS.STREAM_BANK,
-            dialogue: "Vivian tries to creep by, but a long, sticky tongue shoots out and plucks her staff, pulling her closer. 'Not so fast, little adventurer,' the frog rumbles. 'The path ahead requires a sharp mind, not sneaky feet. Now, a riddle...'",
-            choices: [
-                { text: "Okay, fine. Ask away.", next: "act2_ask_frog" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '8%', left: '35%' } }, { id: 'frog', pos: { bottom: '10%', left: '60%' } }],
+            dialogue: "Vivian tries to creep by, but a long, sticky tongue shoots out and plucks her staff, pulling her closer. 'Not so fast, adventurer,' the frog rumbles. 'The path ahead requires a sharp mind, not sneaky feet. Now, a riddle...'",
+            choices: [{ text: "Okay, fine. Ask away.", next: "act2_ask_frog" }]
         },
         act2_riddle_wrong: {
             bg: ASSETS.STREAM_BANK,
+            sprites: [{ id: 'vivian', pos: { bottom: '8%', left: '20%' } }, { id: 'frog', pos: { bottom: '10%', left: '60%' } }],
             dialogue: "'Incorrect,' the frog sighs, seeming even sleepier. 'Ponder it more. The forest does not reward haste.' He closes his eyes again.",
-            choices: [
-                { text: "Try the riddle again.", next: "act2_ask_frog" }
-            ]
+            choices: [{ text: "Try the riddle again.", next: "act2_ask_frog" }]
         },
         act2_riddle_correct: {
             bg: ASSETS.STREAM_BANK,
-            dialogue: "'Hah! Correct!' The frog chuckles. 'A map it is. You have a good head on your... cap. To find the Fuckywupyweed, you must venture into the Gloomy Thicket. But you will need a guide. Seek the light in the darkness.'",
-            choices: [
-                { text: "Thank him and enter the thicket.", next: "act2_thicket_entrance" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '8%', left: '20%' } }, { id: 'frog', pos: { bottom: '10%', left: '60%' } }],
+            dialogue: "'Hah! Correct!' The frog chuckles. 'A map it is. To find the Fuckywupyweed, you must venture into the Gloomy Thicket. But you will need a guide. Seek the light in the darkness.'",
+            choices: [{ text: "Thank him and enter the thicket.", next: "act2_thicket_entrance" }]
         },
         act2_thicket_entrance: {
             bg: ASSETS.THICKET_ENTRANCE,
-            setup: () => {
-                showSprite(vivianSprite, {bottom: '5%', left: '30%', width: '160px'});
-                hideSprite(frogSprite);
-            },
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '30%' } }],
             dialogue: "The entrance to the Gloomy Thicket is just as advertised. The air grows cool and the light fades. It's a bit spooky, but Vivian remembers the frog's words: 'Seek the light in the darkness.'",
-            choices: [
-                { text: "Venture into the dark.", next: "act3_thicket_inside" }
-            ]
+            choices: [{ text: "Venture into the dark.", next: "act3_thicket_inside" }]
         },
         act3_thicket_inside: {
             bg: ASSETS.INSIDE_THICKET,
-            setup: () => {
-                showSprite(vivianSprite, {bottom: '5%', left: '25%', width: '150px'});
-                showSprite(fireflySprite, {bottom: '45%', left: '60%', width: '120px'});
-            },
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '25%' } }, { id: 'firefly', pos: { bottom: '45%', left: '60%' } }],
             dialogue: "Deep inside, it's nearly pitch black. Then, a soft, warm glow appears. It's a tiny, smiling firefly! It buzzes gently, as if waiting.",
-            choices: [
-                { text: "Follow the friendly light.", next: "act3_follow_firefly" },
-                { text: "Try to find your own way.", next: "act3_lost" }
-            ]
+            choices: [{ text: "Follow the friendly light.", next: "act3_follow_firefly" }, { text: "Try to find your own way.", next: "act3_lost" }]
         },
         act3_lost: {
             bg: ASSETS.INSIDE_THICKET,
-             setup: () => {
-                hideSprite(fireflySprite);
-            },
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '25%' } }],
             dialogue: "Ignoring the firefly, Vivian pushes on alone. But the paths twist and turn. Soon, every direction looks the same. She is lost. A worthy attempt, but the quest ends here.",
-            choices: [
-                { text: "Bummer. (Try Again?)", next: "start" }
-            ]
+            choices: [{ text: "Bummer. (Try Again?)", next: "start" }]
         },
         act3_follow_firefly: {
             bg: ASSETS.HIDDEN_GROTTO,
-            setup: () => {
-                showSprite(vivianSprite, {bottom: '5%', left: '15%', width: '180px'});
-                showSprite(fireflySprite, {bottom: '60%', left: '25%', width: '100px'});
-                showSprite(giggleweedSprite, {bottom: '35%', left: '52%', width: '200px', transform: 'translateX(-50%) rotate(-15deg)'});
-            },
-            dialogue: "Vivian follows the little firefly through winding, dark paths. Suddenly, the trees open up into a breathtaking grotto! A waterfall cascades behind a stone altar, and upon it... the Fuckywupyweed Roll-up!",
-            choices: [
-                { text: "Claim the birthday prize!", next: "win_ending" }
-            ]
+            sprites: [{ id: 'vivian', pos: { bottom: '5%', left: '15%' } }, { id: 'firefly', pos: { bottom: '60%', left: '25%' } }, { id: 'fuckywupyweed', pos: { bottom: '35%', left: '50%', transform: 'translateX(-50%) rotate(-15deg)' } }],
+            dialogue: "Vivian follows the little firefly through winding paths. Suddenly, the trees open up into a breathtaking grotto! A waterfall cascades behind a stone altar, and upon it... the Fuckywupyweed Roll-up!",
+            choices: [{ text: "Claim the birthday prize!", next: "win_ending" }]
         },
         win_ending: {
             bg: ASSETS.MUSHROOM_GROVE,
-            setup: () => {
-                 showSprite(vivianSprite, {bottom: '5%', left: '50%', width: '180px', transform: 'translateX(-50%)'});
-                 showSprite(giggleweedSprite, {bottom: '5%', left: '30%', width: '100px', transform: 'translateX(-50%)'}); 
-                 hideSprite(fireflySprite);
-            },
+            sprites: [
+                { id: 'vivian', pos: { bottom: '5%', left: '40%', transform: 'translateX(-50%)' } },
+                { id: 'fuckywupyweed', pos: { bottom: '20%', left: '65%', transform: 'translateX(-50%) rotate(20deg)'} }
+            ],
             dialogue: "Vivian returns home a hero, the Fuckywupyweed Roll-up in hand. Her birthday party was legendary. The forest echoed with laughter and good vibes for weeks. It was the best birthday ever.",
-            choices: [
-                { text: "Truly Victorious! (Play Again?)", next: "start" }
-            ]
+            choices: [{ text: "Truly Victorious! (Play Again?)", next: "start" }]
         }
     };
         
-    let currentNodeKey = "start";
-
-    function showSprite(element, { bottom, left, width, transform = '' }) {
-        element.classList.remove('hidden');
-        element.style.bottom = bottom;
-        element.style.left = left;
-        element.style.width = width;
-        element.style.transform = transform;
-    }
-
-    function hideSprite(element) {
-        element.classList.add('hidden');
-    }
-
-    function adjustFontSize() {
-        const dialogueWrapper = document.getElementById('dialogue-wrapper');
-        const dialogueText = document.getElementById('dialogue-text');
-        const maxFontSize = 28;
-        const minFontSize = 18;
-        let currentSize = maxFontSize;
-        dialogueText.style.fontSize = currentSize + 'px';
-        while (dialogueText.scrollHeight > dialogueWrapper.clientHeight && currentSize > minFontSize) {
-            currentSize--;
-            dialogueText.style.fontSize = currentSize + 'px';
-        }
-    }
-
     function showNode(nodeKey) {
-        let node = story[nodeKey];
+        const node = story[nodeKey];
         if (!node) {
             console.error("Story node not found:", nodeKey);
             return;
         }
         
-        currentNodeKey = nodeKey;
-        
-        sceneContainer.style.backgroundImage = `url('${node.bg}')`;
-        
-        node.setup?.();
-
+        sceneContainer.style.backgroundImage = `url("${node.bg}")`;
         dialogueText.textContent = node.dialogue;
 
-        adjustFontSize();
-        
+        // --- THE FIX ---
+        // This resets the scrollbar to the top for the dialogue box
+        dialogueWrapper.scrollTop = 0; 
+
+        const activeSpriteIds = node.sprites.map(s => s.id);
+        for (const spriteId in allSprites) {
+            if (!activeSpriteIds.includes(spriteId)) {
+                allSprites[spriteId].classList.add('hidden');
+            }
+        }
+
+        node.sprites.forEach(spriteInfo => {
+            const element = allSprites[spriteInfo.id];
+            element.classList.remove('hidden');
+            Object.assign(element.style, {
+                bottom: spriteInfo.pos.bottom || null,
+                left: spriteInfo.pos.left || null,
+                transform: spriteInfo.pos.transform || ''
+            });
+        });
+
         choicesContainer.innerHTML = '';
         node.choices.forEach(choice => {
             const button = document.createElement('button');
@@ -338,18 +308,21 @@
     }
 
     window.onload = () => {
-        vivianSprite.src = ASSETS.VIVIAN;
-        frogSprite.src = ASSETS.FROG;
-        fireflySprite.src = ASSETS.FIREFLY;
-        giggleweedSprite.src = ASSETS.FUCKYWUPYWEED;
+        Object.keys(allSprites).forEach(key => {
+            allSprites[key].src = ASSETS[key.toUpperCase()];
+        });
         
         Object.values(ASSETS).forEach(url => {
-             const img = new Image();
-             img.src = url;
+             if (url.includes('bg')) {
+                const img = new Image();
+                img.src = url;
+             }
         });
         
         showNode('start');
     };
+
     </script>
 </body>
 </html>
+
